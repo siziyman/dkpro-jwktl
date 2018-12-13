@@ -17,9 +17,7 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.jwktl.api.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -31,7 +29,10 @@ import java.util.TreeMap;
  */
 public class Language implements ILanguage {
 
-	protected String code;
+	/**
+	 * The French language.
+	 */
+	public static final ILanguage FRENCH = get("fra");
 	protected String name;
 	protected String iso639_3;
 	protected String iso639_2b;
@@ -104,6 +105,8 @@ public class Language implements ILanguage {
 	public static final ILanguage GERMAN = get("deu");
 	/** The Russian language. */
 	public static final ILanguage RUSSIAN = get("rus");
+
+	protected String code;
 	
 	private static boolean initialized;
 	private static Map<String, ILanguage> languageIndex;
