@@ -18,7 +18,7 @@ class FRWiktionaryEntryParser : WiktionaryEntryParser(Language.FRENCH, "REDIRECT
      * the information from the article constituents are registered.  */
     init {
         // Fixed name content handlers.
-        register(FRSemanticRelationHandler(RelationType.SYNONYM, "Synonymes"))
+        register(FRSemanticRelationHandler(RelationType.SYNONYM, "Synonymes", "syn"))
         register(FRSemanticRelationHandler(RelationType.ANTONYM, "Antonymes"))
         register(FRSemanticRelationHandler(RelationType.HYPERNYM, "Hyperonymes"))
         register(FRSemanticRelationHandler(RelationType.HYPONYM, "Hyponymes"))
