@@ -1,3 +1,17 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
 package de.tudarmstadt.ukp.jwktl.parser.fr.components
 
 import de.tudarmstadt.ukp.jwktl.api.IWiktionaryTranslation
@@ -15,6 +29,7 @@ import java.util.*
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
+@Suppress("unused")
 class FRTranslationHandler : FRBlockHandler("Traductions") {
 
     private lateinit var currentSense: String
@@ -79,10 +94,9 @@ class FRTranslationHandler : FRBlockHandler("Traductions") {
         val postfix = matcher.group("postfix")
 
         val translation: WiktionaryTranslation?
-        if (content.startsWith("{{")) {
-            translation = parseTemplate(content)
-        } else {
-            translation = WiktionaryTranslation(languageHeader, cleanText(removeWikiLinks(content)))
+        translation = when {
+            content.startsWith("{{") -> parseTemplate(content)
+            else -> WiktionaryTranslation(languageHeader, cleanText(removeWikiLinks(content)))
         }
 
         if (translation != null) {
@@ -156,12 +170,7 @@ class FRTranslationHandler : FRBlockHandler("Traductions") {
     }
 
     private fun findSense(entry: WiktionaryEntry, marker: String): WiktionarySense {
-        val sense = findMatchingSense(entry, marker)
-        return if (sense != null) {
-            sense
-        } else {
-            entry.unassignedSense
-        }
+        return findMatchingSense(entry, marker) ?: entry.unassignedSense
     }
 
     companion object {

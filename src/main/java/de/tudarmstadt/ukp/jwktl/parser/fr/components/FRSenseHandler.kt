@@ -1,15 +1,26 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
 package de.tudarmstadt.ukp.jwktl.parser.fr.components
 
 import de.tudarmstadt.ukp.jwktl.api.IPronunciation
-import de.tudarmstadt.ukp.jwktl.api.IWiktionaryWordForm
 import de.tudarmstadt.ukp.jwktl.api.PartOfSpeech
 import de.tudarmstadt.ukp.jwktl.api.RelationType
 import de.tudarmstadt.ukp.jwktl.api.entry.*
-import de.tudarmstadt.ukp.jwktl.api.util.GrammaticalGender
 import de.tudarmstadt.ukp.jwktl.api.util.Language
 import de.tudarmstadt.ukp.jwktl.api.util.TemplateParser
 import de.tudarmstadt.ukp.jwktl.parser.en.components.ENNonEngWordFormHandler
-import de.tudarmstadt.ukp.jwktl.parser.en.components.ENWordFormHandler
 import de.tudarmstadt.ukp.jwktl.parser.en.components.EnGlossEntry
 import de.tudarmstadt.ukp.jwktl.parser.en.components.IWordFormHandler
 import de.tudarmstadt.ukp.jwktl.parser.util.ParsingContext
@@ -23,13 +34,6 @@ import java.util.regex.Pattern
  * Date: 12-Mar-19.
  */
 class FRSenseHandler : FRBlockHandler() {
-    protected val EXAMPLE_PATTERN = Pattern.compile("^#+:+")
-    protected val POS_PATTERN = Pattern.compile(
-            "^====?\\s*(?:"
-                    + "\\{\\{([^\\}\\|]+)(?:\\|[^\\}\\|]*)?\\}\\}|"
-                    + "\\[\\[(?:[^\\]\\|]+\\|)?([^\\]\\|]+)\\]\\]|"
-                    + "([^=]+?)"
-                    + ")\\s*\\d*\\s*=?===$")
 
     /**
      * Extracted pos string
@@ -59,19 +63,18 @@ class FRSenseHandler : FRBlockHandler() {
     override fun canHandle(blockHeader: String): Boolean {
         partOfSpeech = null
         var posLabel = blockHeader.trim { it <= ' ' }
-        if (!posLabel.startsWith("===") || !posLabel.endsWith("==="))
+        if (!posLabel.startsWith("==") || !posLabel.endsWith("=="))
             return false
 
         val matcher = POS_PATTERN.matcher(blockHeader)
         if (!matcher.find())
             return false
 
-        if (matcher.group(1) != null)
-            posLabel = matcher.group(1)
-        else if (matcher.group(2) != null)
-            posLabel = matcher.group(2)
-        else
-            posLabel = matcher.group(3)
+        posLabel = when {
+            matcher.group(1) != null -> matcher.group(1)
+            matcher.group(2) != null -> matcher.group(2)
+            else -> matcher.group(3)
+        }
 
         partOfSpeech = PartOfSpeech.findByName(posLabel, FREntryFactory.posMap)
         return (partOfSpeech != null)
@@ -91,8 +94,8 @@ class FRSenseHandler : FRBlockHandler() {
     }
 
     private fun getWordFormHandler(context: ParsingContext): IWordFormHandler {
-        return if (Language.ENGLISH == context.language) {
-            ENWordFormHandler(context.page.title)
+        return if (Language.FRENCH == context.language) {
+            FRWordFormHandler(context.page.title)
         } else {
             ENNonEngWordFormHandler()
         }
@@ -125,12 +128,15 @@ class FRSenseHandler : FRBlockHandler() {
             val subsense = line.substring(2).trim { it <= ' ' }
             if (!glossEntryList.isEmpty()) {
                 val glossEntry = glossEntryList[glossEntryList.size - 1]
-                if (subsense.startsWith("*")) {
-                    quotationHandler.extractQuotation(subsense, additionalLine, context)
-                    lastPrefix = "##*"
-                } else {
-                    glossEntry.setGloss(glossEntry.definition + "\n" + subsense)
-                    lastPrefix = "##"
+                lastPrefix = when {
+                    subsense.startsWith("*") -> {
+                        quotationHandler.extractQuotation(subsense, additionalLine, context)
+                        "##*"
+                    }
+                    else -> {
+                        glossEntry.setGloss(glossEntry.definition + "\n" + subsense)
+                        "##"
+                    }
                 }
             }
             takeControl = false
@@ -176,17 +182,16 @@ class FRSenseHandler : FRBlockHandler() {
             entry = context.page.getEntry(0)
             entry.wordLanguage = context.language
             entry.addPartOfSpeech(context.partOfSpeech)
-            if (context.header != null)
+            context.header?.let {
                 entry.header = context.header
+            }
             entry.wordEtymology = context.etymology
         } else {
             entry = entryFactory.createEntry(context)
             context.page.addEntry(entry)
         }
 
-        val pronunciations = context.pronunciations
-        if (pronunciations != null)
-            pronunciations.forEach(Consumer<IPronunciation> { entry.addPronunciation(it) })
+        context.pronunciations?.forEach(Consumer<IPronunciation> { entry.addPronunciation(it) })
         for (senseEntry in glossEntryList) {
             val sense = entry.createSense()
             sense.gloss = WikiString(senseEntry.definition)
@@ -202,10 +207,10 @@ class FRSenseHandler : FRBlockHandler() {
                     .flatMap { e -> e.value.stream().map { target -> WiktionaryRelation(target, e.key) } }
                     .forEach { sense.addRelation(it) }
         }
-        wordFormHandler.wordForms.forEach(Consumer<IWiktionaryWordForm> { entry.addWordForm(it) })
+        wordFormHandler.wordForms.forEach { entry.addWordForm(it) }
         entry.rawHeadwordLine = wordFormHandler.rawHeadwordLine
 
-        wordFormHandler.genders?.forEach(Consumer<GrammaticalGender> { entry.addGender(it) })
+        wordFormHandler.genders?.forEach { entry.addGender(it) }
     }
 
     private fun isNym(line: String): Boolean {
@@ -231,12 +236,10 @@ class FRSenseHandler : FRBlockHandler() {
                 EXAMPLE_PATTERN.matcher(lastPrefix!!).matches() &&
                 currentPrefix.length > lastPrefix!!.length)
 
-        if (additionalLine) {
-            glossEntry.appendExample(lineContent, " ")
-        } else if (translatedExample) {
-            glossEntry.appendExampleTranslation(lineContent)
-        } else {
-            glossEntry.addExample(lineContent)
+        when {
+            additionalLine -> glossEntry.appendExample(lineContent, " ")
+            translatedExample -> glossEntry.appendExampleTranslation(lineContent)
+            else -> glossEntry.addExample(lineContent)
         }
     }
 
@@ -255,10 +258,16 @@ class FRSenseHandler : FRBlockHandler() {
     private fun getRelationType(template: TemplateParser.Template): RelationType? {
         // https://en.wiktionary.org/wiki/Template:synonyms
         // https://en.wiktionary.org/wiki/Template:antonyms
-        when (template.name) {
-            "syn", "synonyms" -> return RelationType.SYNONYM
-            "ant", "antonyms" -> return RelationType.ANTONYM
-            else -> return null
+        return when (template.name) {
+            "syn", "synonyms" -> RelationType.SYNONYM
+            "ant", "antonyms" -> RelationType.ANTONYM
+            else -> null
         }
+    }
+
+    companion object {
+        private val POS_PATTERN = Pattern.compile(
+                """^====?\s*(?:\{\{([^\}\|]+)(?:\|[^\}\|]*)?\}\}|\[\[(?:[^\]\|]+\|)?([^\]\|]+)\]\]|([^=]+?))\s*\d*\s*=?===$""")
+        private val EXAMPLE_PATTERN = Pattern.compile("^#+:+")
     }
 }

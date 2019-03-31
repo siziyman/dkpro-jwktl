@@ -17,10 +17,7 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.jwktl.parser;
 
-import java.util.logging.Logger;
-
 import com.sleepycat.je.DatabaseException;
-
 import de.tudarmstadt.ukp.jwktl.api.IWiktionaryPage;
 import de.tudarmstadt.ukp.jwktl.api.WiktionaryException;
 import de.tudarmstadt.ukp.jwktl.api.entry.WiktionaryPage;
@@ -28,8 +25,11 @@ import de.tudarmstadt.ukp.jwktl.api.util.ILanguage;
 import de.tudarmstadt.ukp.jwktl.api.util.Language;
 import de.tudarmstadt.ukp.jwktl.parser.de.DEWiktionaryEntryParser;
 import de.tudarmstadt.ukp.jwktl.parser.en.ENWiktionaryEntryParser;
+import de.tudarmstadt.ukp.jwktl.parser.fr.FRWiktionaryEntryParser;
 import de.tudarmstadt.ukp.jwktl.parser.ru.RUWiktionaryEntryParser;
 import de.tudarmstadt.ukp.jwktl.parser.util.IDumpInfo;
+
+import java.util.logging.Logger;
 
 /**
  * Parses a Wiktionary XML dump and stores the parsed information as a 
@@ -93,7 +93,9 @@ public class WiktionaryArticleParser extends WiktionaryPageParser<WiktionaryPage
 		} else
 		if (Language.RUSSIAN.equals(language)) {
 			entryParser = new RUWiktionaryEntryParser();
-		} else 	
+		} else if (Language.FRENCH.equals(language)) {
+			entryParser = new FRWiktionaryEntryParser();
+		} else
 			throw new WiktionaryException("Language " + language 
 					+ " is not supported");
 		

@@ -1,11 +1,26 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
 package de.tudarmstadt.ukp.jwktl.parser.fr
 
 import de.tudarmstadt.ukp.jwktl.api.RelationType
 import de.tudarmstadt.ukp.jwktl.api.entry.WiktionaryPage
 import de.tudarmstadt.ukp.jwktl.api.util.Language
 import de.tudarmstadt.ukp.jwktl.parser.WiktionaryEntryParser
-import de.tudarmstadt.ukp.jwktl.parser.fr.components.FREntryFactory
-import de.tudarmstadt.ukp.jwktl.parser.fr.components.FRSemanticRelationHandler
+import de.tudarmstadt.ukp.jwktl.parser.components.CategoryHandler
+import de.tudarmstadt.ukp.jwktl.parser.components.InterwikiLinkHandler
+import de.tudarmstadt.ukp.jwktl.parser.fr.components.*
 import de.tudarmstadt.ukp.jwktl.parser.util.ParsingContext
 
 /**
@@ -28,18 +43,16 @@ class FRWiktionaryEntryParser : WiktionaryEntryParser(Language.FRENCH, "REDIRECT
         register(FRSemanticRelationHandler(RelationType.DERIVED_TERM, "Dérivés"))
         register(FRSemanticRelationHandler(RelationType.ETYMOLOGICALLY_RELATED_TERM, "Apparentés étymologiques"))
         register(FRSemanticRelationHandler(RelationType.SEE_ALSO, "Voir aussi"))
-//        register(FRTranslationHandler())
-//        register(FREtymologyHandler())
-//        register(FRReferenceHandler())
-//        register(FRQuotationHandler())
-//        register(FRPronunciationHandler())
-//        register(FRUsageNotesHandler())
+        register(FRTranslationHandler())
+        register(FREtymologyHandler())
+        register(FRReferenceHandler())
+        register(FRQuotationHandler())
+        register(FRPronunciationHandler())
 
-        // Pattern
-//        register(CategoryHandler("Category"))
-//        register(InterwikiLinkHandler("Category"))
-//        register(ENWordLanguageHandler())
-//        register(ENSenseHandler())
+        register(CategoryHandler("Category"))
+        register(InterwikiLinkHandler("Category"))
+        register(FRWordLanguageHandler())
+        register(FRSenseHandler())
     }
 
     override fun createParsingContext(page: WiktionaryPage): ParsingContext {

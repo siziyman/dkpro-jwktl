@@ -1,3 +1,17 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
 package de.tudarmstadt.ukp.jwktl.parser.fr.components
 
 import de.tudarmstadt.ukp.jwktl.api.IPronunciation
@@ -23,10 +37,8 @@ class FRPronunciationHandler : FRBlockHandler() {
     protected lateinit var pronunciations: MutableList<IPronunciation>
 
     override fun canHandle(blockHeader: String): Boolean {
-        var blockHeader = blockHeader
-        blockHeader = StringUtils.strip(blockHeader, "{}=: 1234567890").toLowerCase()
-        return ("pronunciation" == blockHeader || "pronuncaition" == blockHeader
-                || "pronunceation" == blockHeader || "pronunciaton" == blockHeader)
+        val curHeader = StringUtils.strip(blockHeader, "{}=: 1234567890").toLowerCase()
+        return ("Prononciation" == curHeader)
 
     }
 
@@ -59,8 +71,6 @@ class FRPronunciationHandler : FRBlockHandler() {
             pronunciations.add(Pronunciation(IPronunciation.PronunciationType.RAW, matcher.group(0), null))
         }
 
-        //TODO: english pronunciation key/AHD
-        //TODO: separate property for sense
         matcher = PRONUNCIATION_AUDIO.matcher(textLine)
         if (matcher.find()) {
             val note = ctx.toString() + " " + matcher.group(2)
