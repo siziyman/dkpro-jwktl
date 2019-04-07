@@ -69,6 +69,7 @@ class FRSenseHandler : FRBlockHandler() {
         val matcher = POS_PATTERN.matcher(blockHeader)
         if (!matcher.find())
             return false
+//        println("matched: $blockHeader")
 
         posLabel = when {
             matcher.group(1) != null -> matcher.group(1)
@@ -267,7 +268,7 @@ class FRSenseHandler : FRBlockHandler() {
 
     companion object {
         private val POS_PATTERN = Pattern.compile(
-                """^====?\s*(?:\{\{([^\}\|]+)(?:\|[^\}\|]*)?\}\}|\[\[(?:[^\]\|]+\|)?([^\]\|]+)\]\]|([^=]+?))\s*\d*\s*=?===$""")
+                """^====?\s*\{\{S\|([\p{L}- ]+)\|([\p{L}- ]+)(?:\|([\p{L}- ]+))?}}\s*=?===$""")
         private val EXAMPLE_PATTERN = Pattern.compile("^#+:+")
     }
 }

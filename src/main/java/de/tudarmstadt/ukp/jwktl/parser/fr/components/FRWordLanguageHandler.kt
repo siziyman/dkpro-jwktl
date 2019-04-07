@@ -24,7 +24,7 @@ import java.util.regex.Pattern
  * Author: siziyman
  * Date: 17-Feb-19.
  */
-class FRWordLanguageHandler: FRBlockHandler(), IBlockHandler {
+class FRWordLanguageHandler : FRBlockHandler(), IBlockHandler {
     var language: ILanguage? = null
 
     override fun canHandle(blockHeader: String): Boolean {
@@ -34,13 +34,12 @@ class FRWordLanguageHandler: FRBlockHandler(), IBlockHandler {
         }
 
         language = null
-        //		System.out.println(textLine);
-        val matcher = Companion.languageHeader.matcher(blockHeader)
+        val matcher = Companion.languageHeader.matcher(blockHeader.trim())
         if (!matcher.find())
             return false
 
-        //		System.out.println(matcher.group(1));
-        language = Language.findByName(matcher.group(1))
+        val lang = matcher.group(1)
+        language = Language.findByCode(lang)
         return language != null
     }
 
@@ -57,7 +56,7 @@ class FRWordLanguageHandler: FRBlockHandler(), IBlockHandler {
     }
 
     companion object {
-        private val languageHeader = Pattern.compile("^\\{\\{langue\\|(\\p{L}+)}}")
+        private val languageHeader = Pattern.compile("^\\s*==\\s*\\{\\{langue\\|(\\p{L}+)}}")
     }
 
 }

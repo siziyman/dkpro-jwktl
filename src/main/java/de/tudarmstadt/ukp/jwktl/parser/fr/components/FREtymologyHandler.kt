@@ -41,8 +41,8 @@ class FREtymologyHandler(vararg labels: String) : FRBlockHandler(*labels) {
     }
 
     override fun fillContent(context: ParsingContext) {
-        if (!contentBuffer.toString().trim { it <= ' ' }.isEmpty()) {
-            context.etymology = WikiString(contentBuffer.toString().trim { it <= ' ' })
+        if (!contentBuffer.toString().trim ().isEmpty()) {
+            context.etymology = WikiString(contentBuffer.toString().trim())
         } else {
             context.etymology = null
         }

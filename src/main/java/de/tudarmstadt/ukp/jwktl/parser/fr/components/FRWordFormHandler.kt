@@ -23,20 +23,23 @@ import de.tudarmstadt.ukp.jwktl.parser.en.components.IWordFormHandler
  * Date: 21-Mar-19.
  */
 class FRWordFormHandler(title: String?) : IWordFormHandler {
+    init {
+        println(title)
+    }
     override fun getWordForms(): MutableList<IWiktionaryWordForm> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return emptyList<IWiktionaryWordForm>().toMutableList()
     }
 
     override fun getGenders(): MutableList<GrammaticalGender> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return emptyList<GrammaticalGender>().toMutableList()
     }
 
     override fun getRawHeadwordLine(): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return ""
     }
 
     override fun parse(line: String?): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return true
     }
 
 }
