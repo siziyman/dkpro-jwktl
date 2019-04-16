@@ -17,13 +17,10 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.jwktl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
+import de.tudarmstadt.ukp.jwktl.api.*;
 
-import de.tudarmstadt.ukp.jwktl.api.IWiktionaryEdition;
-import de.tudarmstadt.ukp.jwktl.api.IWiktionaryPage;
-import de.tudarmstadt.ukp.jwktl.api.WiktionaryFormatter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Offers a command line interface to Wiktionary. You can type a word and 
@@ -45,9 +42,9 @@ public class WiktionaryCli {
 		String wktPath = args[0];
 		WiktionaryFormatter formatter = WiktionaryFormatter.instance();
 		
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, "UTF8"));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 		System.out.print(PROMPT);
-		try (IWiktionaryEdition wkt = JWKTL.openEdition(new File(wktPath))) {
+			try (IWiktionaryEdition wkt = JWKTL.openEdition(new File(wktPath))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				if (line.equals(END))

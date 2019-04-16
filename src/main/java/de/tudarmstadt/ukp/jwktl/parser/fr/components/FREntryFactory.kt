@@ -19,43 +19,43 @@ import de.tudarmstadt.ukp.jwktl.parser.entry.EntryFactory
 
 open class FREntryFactory : EntryFactory() {
     override fun findPartOfSpeech(name: String): PartOfSpeech? {
-        return PartOfSpeech.findByName(name, posMap)
+        return PartOfSpeech.findByName(name.toLowerCase(), posMap)
     }
 
     companion object {
         val posMap: MutableMap<String, PartOfSpeech> = mutableMapOf()
+
+        init {
+
+            posMap["ABRÉVIATION"] = PartOfSpeech.ABBREVIATION
+            posMap["ACRONYME"] = PartOfSpeech.ACRONYM
+            posMap["ADJECTIF"] = PartOfSpeech.ADJECTIVE
+            posMap["ADJECTIF_NUMÉRAL"] = PartOfSpeech.ADJECTIVE
+            posMap["ADVERBE"] = PartOfSpeech.ADVERB
+            posMap["ARTICLE_DÉFINI"] = PartOfSpeech.ARTICLE
+            posMap["CONJONCTION"] = PartOfSpeech.CONJUNCTION
+            posMap["CONTRACTION"] = PartOfSpeech.CONTRACTION
+            posMap["DÉTERMINANT"] = PartOfSpeech.DETERMINER
+            posMap["GISMU"] = PartOfSpeech.GISMU
+            posMap["IDIOME"] = PartOfSpeech.IDIOM
+            posMap["INTERJECTION"] = PartOfSpeech.INTERJECTION
+            posMap["LETTRE"] = PartOfSpeech.LETTER
+            posMap["NOM"] = PartOfSpeech.NOUN
+            posMap["NOM"] = PartOfSpeech.NOUN
+            posMap["NUMÉRAL"] = PartOfSpeech.NUMBER
+            posMap["PARTICULE"] = PartOfSpeech.PARTICLE
+            posMap["POSTPOSITION"] = PartOfSpeech.POSTPOSITION
+            posMap["PREPOSITION"] = PartOfSpeech.PREPOSITION
+            posMap["PRONOM"] = PartOfSpeech.PRONOUN
+            posMap["NOM_PROPRE"] = PartOfSpeech.PROPER_NOUN
+            posMap["PROVERBE"] = PartOfSpeech.PROVERB
+            posMap["SYMBOLE"] = PartOfSpeech.SYMBOL
+            posMap["VERBE"] = PartOfSpeech.VERB
+            posMap["CARACTÈRE"] = PartOfSpeech.CHARACTER
+            posMap["NUMÉRAL"] = PartOfSpeech.NUMERAL
+
+        }
     }
 
-
-    init
-    {
-        posMap["abréviation"] = PartOfSpeech.ABBREVIATION
-        posMap["acronyme"] = PartOfSpeech.ACRONYM
-        posMap["adjectif"] = PartOfSpeech.ADJECTIVE
-        posMap["adjectif numéral"] = PartOfSpeech.ADJECTIVE
-        posMap["adverbe"] = PartOfSpeech.ADVERB
-        posMap["article défini"] = PartOfSpeech.ARTICLE
-        posMap["conjonction"] = PartOfSpeech.CONJUNCTION
-        posMap["contraction"] = PartOfSpeech.CONTRACTION
-        posMap["déterminant"] = PartOfSpeech.DETERMINER
-        posMap["gismu"] = PartOfSpeech.GISMU
-        posMap["idiome"] = PartOfSpeech.IDIOM
-        posMap["interjection"] = PartOfSpeech.INTERJECTION
-        posMap["lettre"] = PartOfSpeech.LETTER
-        posMap["nom"] = PartOfSpeech.NOUN
-        posMap["numéral"] = PartOfSpeech.NUMBER
-        posMap["particule"] = PartOfSpeech.PARTICLE
-        posMap["postposition"] = PartOfSpeech.POSTPOSITION
-        posMap["preposition"] = PartOfSpeech.PREPOSITION
-        posMap["pronom"] = PartOfSpeech.PRONOUN
-        posMap["nom propre"] = PartOfSpeech.PROPER_NOUN
-        posMap["proverbe"] = PartOfSpeech.PROVERB
-        posMap["symbole"] = PartOfSpeech.SYMBOL
-        posMap["verbe"] = PartOfSpeech.VERB
-
-        posMap["caractère"] = PartOfSpeech.CHARACTER
-        posMap["numéral"] = PartOfSpeech.NUMERAL
-
-    }
 
 }

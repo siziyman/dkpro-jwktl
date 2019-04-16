@@ -152,8 +152,10 @@ public class WiktionaryArticleParser extends WiktionaryPageParser<WiktionaryPage
 //			time = System.nanoTime() - time;
 //			System.out.println("saveWiktionaryPage " + (time / 1000) + "ms");
 			
-			if (dumpInfo.getProcessedPages() % 25000 == 0)
+			if (dumpInfo.getProcessedPages() % 25000 == 0) {
+				System.out.printf("Parsed %d pages\n	",dumpInfo.getProcessedPages());
 				wiktionaryDB.commit();
+			}
 		} catch (DatabaseException e) {
 			throw new WiktionaryException("Unable to save page " + page.getTitle(), e);
 		}

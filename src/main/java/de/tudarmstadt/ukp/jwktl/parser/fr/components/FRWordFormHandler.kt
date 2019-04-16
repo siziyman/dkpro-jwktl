@@ -24,7 +24,7 @@ import de.tudarmstadt.ukp.jwktl.parser.en.components.IWordFormHandler
  */
 class FRWordFormHandler(title: String?) : IWordFormHandler {
     init {
-        println(title)
+//        println(title)
     }
     override fun getWordForms(): MutableList<IWiktionaryWordForm> {
         return emptyList<IWiktionaryWordForm>().toMutableList()

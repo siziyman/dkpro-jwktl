@@ -17,11 +17,11 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.jwktl.api;
 
-import java.util.Arrays;
-import java.util.TreeSet;
-
 import de.tudarmstadt.ukp.jwktl.api.util.ILanguage;
 import de.tudarmstadt.ukp.jwktl.api.util.Language;
+
+import java.util.Arrays;
+import java.util.TreeSet;
 
 /**
  * Utility class for producing simple string representations for the most
@@ -153,12 +153,14 @@ public class WiktionaryFormatter {
 				
 		if (sense.getQuotations() != null)
 			for (IQuotation quotation : sense.getQuotations()) {
-				result.append("  QTN [")
-					.append(senseIdx).append("] ")
-					.append(quotation.getSource().getText())
-					.append("\n");
-				for (IWikiString ws : quotation.getLines())
-					result.append("    ").append(ws.getText()).append("\n");
+				if (quotation.getSource() != null) {
+					result.append("  QTN [")
+							.append(senseIdx).append("] ")
+							.append(quotation.getSource().getText())
+							.append("\n");
+					for (IWikiString ws : quotation.getLines())
+						result.append("    ").append(ws.getText()).append("\n");
+				}
 			}
 		
 		if (sense.getRelations() != null) {
