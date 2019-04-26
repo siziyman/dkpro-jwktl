@@ -30,7 +30,7 @@ import java.util.function.Consumer
 import java.util.regex.Pattern
 
 @Suppress("unused")
-class FRTranslationHandler : FRBlockHandler("Traductions") {
+class FRTranslationHandler : FRBlockHandler("traductions", "S|traductions") {
 
     private lateinit var currentSense: String
     private var sensNum2trans: MutableMap<String, List<IWiktionaryTranslation>>? = null
@@ -64,24 +64,29 @@ class FRTranslationHandler : FRBlockHandler("Traductions") {
         if (!matcher.find()) {
             return false
         }
-        val languageText = removeWikiLinks(matcher.group(1).trim { it <= ' ' })
-        val language = de.tudarmstadt.ukp.jwktl.api.util.Language.findByName(languageText)
+        val langMatcher = LANG_MATCHER.matcher(removeWikiLinks(matcher.group(1).trim { it <= ' ' }))
+        if (langMatcher.matches()) {
+            val languageText = langMatcher.group(1)
+            val language = de.tudarmstadt.ukp.jwktl.api.util.Language.findByName(languageText)
 
-        val endOffSet = matcher.end()
-        if (endOffSet > currentText.length - 1) {
-            return false
-        }
-        val remainingText = currentText.substring(endOffSet)
-
-        for (part in splitTranslationParts(remainingText)) {
-            val translation = parseTranslation(language, part)
-            if (translation != null) {
-                // Save the translation
-                val translations = (sensNum2trans?.computeIfAbsent(currentSense) { ArrayList() })?.toMutableList()
-                translations?.add(translation)
+            val endOffSet = matcher.end()
+            if (endOffSet > currentText.length - 1) {
+                return false
             }
+            val remainingText = currentText.substring(endOffSet)
+
+            for (part in splitTranslationParts(remainingText)) {
+                val translation = parseTranslation(language, part)
+                if (translation != null) {
+                    // Save the translation
+                    val translations = (sensNum2trans?.computeIfAbsent(currentSense) { ArrayList() })?.toMutableList()
+                    translations?.add(translation)
+                }
+            }
+            return true
         }
         return true
+
     }
 
     private fun parseTranslation(languageHeader: ILanguage?, text: String): IWiktionaryTranslation? {
@@ -173,7 +178,9 @@ class FRTranslationHandler : FRBlockHandler("Traductions") {
         return findMatchingSense(entry, marker) ?: entry.unassignedSense
     }
 
+
     companion object {
+        private val LANG_MATCHER = Pattern.compile("\\s*\\{\\{T\\|([a-zA-Z]+)}}\\s*")
         private val LANGUAGE = Pattern.compile("^\\*:?\\s*(.*?):\\s*")
         private val SEPARATOR = Pattern.compile("(?:]]|}}|\\))\\s*([;,])")
         private val WIKILINK_TRANSLATION = Pattern.compile("(?:\\[\\[.*?]]\\s*)+")
