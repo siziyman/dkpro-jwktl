@@ -25,22 +25,22 @@ import de.tudarmstadt.ukp.jwktl.api.util.TemplateParser
 import de.tudarmstadt.ukp.jwktl.parser.en.components.ENSemanticRelationHandler.findMatchingSense
 import de.tudarmstadt.ukp.jwktl.parser.util.ParsingContext
 import de.tudarmstadt.ukp.jwktl.parser.util.StringUtils.cleanText
-import java.util.*
-import java.util.function.Consumer
 import java.util.regex.Pattern
 
 @Suppress("unused")
 class FRTranslationHandler : FRBlockHandler("traductions", "S|traductions") {
 
-    private lateinit var currentSense: String
-    private var sensNum2trans: MutableMap<String, List<IWiktionaryTranslation>>? = null
+    private var currentSenseIndexed: Int = -1
+    private val sensNum2trans: MutableList<MutableList<IWiktionaryTranslation>> = MutableList(10, init = { ArrayList<IWiktionaryTranslation>().toMutableList() })
 
     /** Initializes the block handler for parsing all sections starting with
      * one of the specified labels.  */
 
     override fun processHead(text: String, context: ParsingContext): Boolean {
-        currentSense = ""
-        sensNum2trans = TreeMap()
+        currentSenseIndexed = -1
+        for (list in sensNum2trans) {
+            list.clear()
+        }
         return true
     }
 
@@ -48,8 +48,34 @@ class FRTranslationHandler : FRBlockHandler("traductions", "S|traductions") {
         val currentText = text.trim { it <= ' ' }
         if (currentText.startsWith("{{trad-début|") && currentText.contains("}}")) {
             val template = TemplateParser.parseTemplate(currentText.substring(2, currentText.indexOf("}}")))
-            if (template != null && template.numberedParamsCount >= 1) {
-                currentSense = template.getNumberedParam(0)
+            if (template != null && template.numberedParamsCount > 1) {
+                try {
+                    val param = template.getNumberedParam(1)
+                    currentSenseIndexed = param!!.toInt()
+                } catch (e : NumberFormatException) {
+                    val param = template.getNumberedParam(1)
+                    val numericRegex = Regex("[0-9]+")
+                    if (param.contains(numericRegex)) {
+                        val split = param!!.split("-")
+                        for (element in split) {
+                            if (numericRegex.matches(element)) {
+                                currentSenseIndexed = element.toInt()
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+            else if (template.numberedParamsCount == 1) {
+                val currentSenseRaw = template.getNumberedParam(0)
+                val entry = context.findEntry()
+                val findSense = findSense(entry, currentSenseRaw)
+                for ((index, sense) in entry.senses().withIndex()) {
+                    if (findSense.id == sense.id) {
+                        currentSenseIndexed = index
+                        break
+                    }
+                }
             }
             return true
         }
@@ -65,7 +91,7 @@ class FRTranslationHandler : FRBlockHandler("traductions", "S|traductions") {
             return false
         }
         val langMatcher = LANG_MATCHER.matcher(removeWikiLinks(matcher.group(1).trim { it <= ' ' }))
-        if (langMatcher.matches()) {
+        if (langMatcher.matches() && currentSenseIndexed > 0) {
             val languageText = langMatcher.group(1)
             val language = de.tudarmstadt.ukp.jwktl.api.util.Language.findByName(languageText)
 
@@ -79,8 +105,11 @@ class FRTranslationHandler : FRBlockHandler("traductions", "S|traductions") {
                 val translation = parseTranslation(language, part)
                 if (translation != null) {
                     // Save the translation
-                    val translations = (sensNum2trans?.computeIfAbsent(currentSense) { ArrayList() })?.toMutableList()
-                    translations?.add(translation)
+                    while (sensNum2trans.size <= currentSenseIndexed) {
+                        sensNum2trans.add(ArrayList<IWiktionaryTranslation>().toMutableList())
+                    }
+                    val list = this.sensNum2trans[currentSenseIndexed]
+                    list.add(translation)
                 }
             }
             return true
@@ -114,9 +143,6 @@ class FRTranslationHandler : FRBlockHandler("traductions", "S|traductions") {
             }
             additionalInformation += postfix
             translation.additionalInformation = cleanText(additionalInformation.trim { it <= ' ' })
-            if (currentSense.trim { it <= ' ' }.isNotEmpty()) {
-                translation.rawSense = currentSense.trim { it <= ' ' }
-            }
             return translation
         } else {
             return null
@@ -166,10 +192,15 @@ class FRTranslationHandler : FRBlockHandler("traductions", "S|traductions") {
     override fun fillContent(context: ParsingContext) {
         val posEntry = context.findEntry()
         if (posEntry != null) {
-            for (trans in sensNum2trans!!.entries) {
-                val targetSense = findSense(posEntry, trans.key)
-
-                trans.value.forEach(Consumer<IWiktionaryTranslation> { targetSense.addTranslation(it) })
+            sensNum2trans.forEachIndexed { index, translations ->
+                for (trans in translations) {
+                    if (index >= posEntry.senses().size) {
+                        posEntry.senses()[0].addTranslation(trans)
+                    }
+                    else {
+                        posEntry.senses()[index].addTranslation(trans)
+                    }
+                }
             }
         }
     }
